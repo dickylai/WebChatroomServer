@@ -16,6 +16,10 @@ public class RoomRegistrator {
 		}
 	}
 	
+	public List<Room> getRooms() {
+		return new ArrayList<Room>(rooms.values());
+	}
+	
 	public void deregister(Room room, User user) {
 		room.deregister(user);
 		

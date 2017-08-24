@@ -21,27 +21,41 @@ public class WebControllerTest {
 	private Model model;
 	private RoomRegistrator roomRegistrator;
 	private UserRegistrator userRegistrator;
+	private RoomUserValidator validator;
 	private RegisterUser registerUser;
 
 	
 	@Before
 	public void setUp() {
-		controller = new WebController();
+		roomRegistrator = mock(RoomRegistrator.class);
+		userRegistrator = mock(UserRegistrator.class);
+		validator = mock(RoomUserValidator.class);
+		controller = new WebController(userRegistrator, roomRegistrator, validator);
 		user = mock(User.class);
 		room = mock(Room.class);
 		session = mock(HttpSession.class);
 		model = mock(Model.class);
-		roomRegistrator = mock(RoomRegistrator.class);
-		userRegistrator = mock(UserRegistrator.class);
 		registerUser = mock(RegisterUser.class);
 	}
 	
 	@Test
-	public void client_can_go_to_home_page() {
-		String page = controller.goToHomePage(model);
+	public void client_can_go_to_home_page_when_with_no_session() {
+		when(session.getAttribute("room")).thenReturn(null);
+		when(session.getAttribute("user")).thenReturn(null);
+		String page = controller.goToHomePage(session, model);
 		
 		verify(model).addAttribute(eq("user"), any(RegisterUser.class));
 		assertEquals("home", page);
+	}
+	
+	@Test
+	public void client_can_go_to_chatroom_page_when_entering_home_page_with_session() {
+		when(session.getAttribute("room")).thenReturn((Room) room);
+		when(session.getAttribute("user")).thenReturn((User) user);
+		when(room.getChatroomId()).thenReturn("123");
+		String page = controller.goToHomePage(session, model);
+
+		assertEquals("redirect:/chatroom/123", page);
 	}
 	
 	@Test
@@ -51,7 +65,7 @@ public class WebControllerTest {
 		when(roomRegistrator.getRoom("1")).thenReturn(room);
 		when(userRegistrator.register("dicky", room)).thenReturn(user);
 		
-		String page = controller.login(session, registerUser, userRegistrator, roomRegistrator);
+		String page = controller.login(session, registerUser);
 		
 		verify(registerUser).getNickname();
 		verify(registerUser).getChatroomId();
@@ -67,14 +81,14 @@ public class WebControllerTest {
 	public void client_can_logout_and_return_to_home_page() {
 		when(session.getAttribute("room")).thenReturn((Room) room);
 		when(session.getAttribute("user")).thenReturn((User) user);
-		String page = controller.logout(session, model, roomRegistrator);
+		String page = controller.logout(session, model);
 		
 		verify(session).getAttribute("room");
 		verify(session).getAttribute("user");
 		verify(roomRegistrator).deregister(room, user);
 		verify(model).addAttribute(eq("user"), any(RegisterUser.class));
 		verify(session).invalidate();
-		assertEquals("home", page);
+		assertEquals("redirect:/", page);
 	}
 	
 	@Test
@@ -82,9 +96,8 @@ public class WebControllerTest {
 		String urlString = "1";
 		when(session.getAttribute("room")).thenReturn((Room) room);
 		when(session.getAttribute("user")).thenReturn((User) user);
-		RoomUserValidator validator = mock(RoomUserValidator.class);
 		when(validator.validate(user, room, urlString)).thenReturn(true);
-		String page = controller.goToChatRoom(session, model, urlString, validator);
+		String page = controller.goToChatRoom(session, model, urlString);
 		
 		verify(session).getAttribute("room");
 		verify(session).getAttribute("user");
@@ -99,9 +112,8 @@ public class WebControllerTest {
 		String urlString = "1";
 		when(session.getAttribute("room")).thenReturn((Room) room);
 		when(session.getAttribute("user")).thenReturn((User) user);
-		RoomUserValidator validator = mock(RoomUserValidator.class);
 		when(validator.validate(user, room, urlString)).thenReturn(false);
-		String page = controller.goToChatRoom(session, model, urlString, validator);
+		String page = controller.goToChatRoom(session, model, urlString);
 		
 		verify(session).getAttribute("room");
 		verify(session).getAttribute("user");
