@@ -5,8 +5,11 @@ import java.util.Date;
 public class OutputMessage extends Message {
 
 	private Date time = new Date();
+
 	private String chatroomId;
 
+	public OutputMessage() {}
+	
 	public OutputMessage(Message message, String chatroomId) {
 		super(message.getFrom(), message.getContent());
 		this.chatroomId = chatroomId;

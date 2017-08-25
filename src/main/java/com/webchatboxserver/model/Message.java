@@ -2,22 +2,24 @@ package com.webchatboxserver.model;
 
 public class Message {
 
-	private User from;
+	private String from;
 	private String content;
 	
-	public Message(User from, String content) {
+	public Message() {}
+	
+	public Message(String from, String content) {
 		this.from = from;
 		this.content = content;
 	}
-
-	public User getFrom() {
+	
+	public String getFrom() {
 		return from;
 	}
-	
-	public void setFrom(User from) {
+
+	public void setFrom(String from) {
 		this.from = from;
 	}
-	
+
 	public String getContent() {
 		return content;
 	}
