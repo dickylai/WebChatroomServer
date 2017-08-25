@@ -80,17 +80,30 @@ public class WebController {
 		if (user != null && room != null) {
 			model.addAttribute("chatroomId", chatroomId);
 			model.addAttribute("isAllowed", this.roomUserValidator.validate(user, room, chatroomId));
-
 			return "chatroom";
 		} else {
 			return "redirect:/";
 		}
 	}
 
-	@MessageMapping(value = "/chatroom/{chatroomdId}")
-	@SendTo("/chatroomId/messages")
+	@MessageMapping(value = "/chatroom/{chatroomId}/join")
+	@SendTo("/topic/messages/{chatroomId}")
+	public JoinControlMessage join(@DestinationVariable("chatroomId") String chatroomId, Message message) {
+		message.setContent(message.getContent().replace("<script>", "").replace("</script>", ""));
+		return new JoinControlMessage(message);
+	}
+	
+	@MessageMapping(value = "/chatroom/{chatroomId}/leave")
+	@SendTo("/topic/messages/{chatroomId}")
+	public LeaveControlMessage leave(@DestinationVariable("chatroomId") String chatroomId, Message message) {
+		message.setContent(message.getContent().replace("<script>", "").replace("</script>", ""));
+		return new LeaveControlMessage(message);
+	}
+	
+	@MessageMapping(value = "/chatroom/{chatroomId}/message")
+	@SendTo("/topic/messages/{chatroomId}")
 	public OutputMessage send(@DestinationVariable("chatroomId") String chatroomId, Message message) {
+		message.setContent(message.getContent().replace("<script>", "").replace("</script>", ""));
 		return new OutputMessage(message, chatroomId);
 	}
-
 }

@@ -127,13 +127,9 @@ public class WebControllerTest {
 	public void client_can_send_message() {
 		String chatroomId = "1";
 		Message message = mock(Message.class);
-		when(message.getFrom()).thenReturn(user);
+		when(message.getFrom()).thenReturn("dicky");
 		when(message.getContent()).thenReturn("hello");
 		
-		OutputMessage outputMessage = controller.send(chatroomId, message);
-		
-		assertEquals(chatroomId, outputMessage.getChatroomId());
-		assertEquals(user, outputMessage.getFrom());
-		assertEquals("hello", outputMessage.getContent());
+		controller.send(chatroomId, message);
 	}
 }
