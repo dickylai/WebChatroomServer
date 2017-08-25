@@ -55,9 +55,13 @@ public class WebController {
 
 		Room room = roomRegistrator.getRoom(chatroomId);
 		User user = userRegistrator.register(nickname, room);
-		session.setAttribute("user", user);
-		session.setAttribute("room", room);
-		return "redirect:/chatroom/" + chatroomId;
+		if (user == null) {
+			return "redirect:/";
+		} else {
+			session.setAttribute("user", user);
+			session.setAttribute("room", room);
+			return "redirect:/chatroom/" + chatroomId;
+		}
 	}
 
 	@RequestMapping(value = "/logout")
@@ -92,14 +96,14 @@ public class WebController {
 		message.setContent(message.getContent().replace("<script>", "").replace("</script>", ""));
 		return new JoinControlMessage(message);
 	}
-	
+
 	@MessageMapping(value = "/chatroom/{chatroomId}/leave")
 	@SendTo("/topic/messages/{chatroomId}")
 	public LeaveControlMessage leave(@DestinationVariable("chatroomId") String chatroomId, Message message) {
 		message.setContent(message.getContent().replace("<script>", "").replace("</script>", ""));
 		return new LeaveControlMessage(message);
 	}
-	
+
 	@MessageMapping(value = "/chatroom/{chatroomId}/message")
 	@SendTo("/topic/messages/{chatroomId}")
 	public OutputMessage send(@DestinationVariable("chatroomId") String chatroomId, Message message) {
